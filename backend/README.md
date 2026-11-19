@@ -9,4 +9,4 @@ Technology Stack:
 - Socket.IO
 - Prisma ORM
 
-Responsible: Rumeth
+Responsible: Rumeth Sathnidu
