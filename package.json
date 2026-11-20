@@ -1,0 +1,30 @@
+{
+  "name": "crewx",
+  "version": "1.0.0",
+  "description": "Smart Crew Scheduling and Workforce Management System",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Krishmanthi/CrewX.git"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Krishmanthi/CrewX/issues"
+  },
+  "homepage": "https://github.com/Krishmanthi/CrewX#readme"
+}

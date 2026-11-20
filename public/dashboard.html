@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card">
+    <h1 id="greeting">Loading…</h1>
+    <p class="sub">You're signed in with a JWT.</p>
+
+    <dl>
+      <dt>Email</dt>
+      <dd id="email">-</dd>
+      <dt>Session expires</dt>
+      <dd id="expires">-</dd>
+    </dl>
+
+    <button id="logout" class="secondary">Sign out</button>
+  </main>
+
+  <script>
+    async function load() {
+      const res = await fetch('/api/me');
+      if (!res.ok) return (location.href = '/');
+
+      const user = await res.json();
+      document.getElementById('greeting').textContent = `Welcome, ${user.name}`;
+      document.getElementById('email').textContent = user.email;
+      document.getElementById('expires').textContent =
+        new Date(user.expiresAt * 1000).toLocaleTimeString();
+    }
+
+    document.getElementById('logout').addEventListener('click', async () => {
+      await fetch('/api/logout', { method: 'POST' });
+      location.href = '/';
+    });
+
+    load();
+  </script>
+</body>
+</html>
