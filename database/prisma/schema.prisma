@@ -16,4 +16,56 @@ model User {
   created_at     DateTime @db.Timestamp(6)
 
   @@map("User")
+  employee Employee?
+}
+
+model Department {
+  departmentId String @id @map("department_id") @db.VarChar(10)
+  name         String @unique @db.VarChar(100)
+
+  teams Team[]
+
+  @@map("Department")
+}
+
+model Team {
+  teamId       String @id @map("team_id") @db.VarChar(10)
+  name         String @db.VarChar(100)
+  departmentId String @map("department_id") @db.VarChar(10)
+
+  department Department @relation(fields: [departmentId], references: [departmentId])
+  employees  Employee[]
+
+  @@map("Team")
+}
+
+model Employee {
+  employeeId String   @id @map("employee_id") @db.VarChar(10)
+  firstName  String   @map("first_name") @db.VarChar(100)
+  lastName   String   @map("last_name") @db.VarChar(100)
+  email      String   @unique @db.VarChar(255)
+  phone      String?  @db.VarChar(20)
+  hireDate   DateTime @map("hire_date") @db.Date
+  status     String   @db.VarChar(30)
+  teamId     String?  @map("team_id") @db.VarChar(10)
+  userId     String?  @unique @map("user_id") @db.VarChar(10)
+
+  team         Team?          @relation(fields: [teamId], references: [teamId])
+  user         User?          @relation(fields: [userId], references: [user_id])
+  availability Availability[]
+
+  @@map("Employee")
+}
+
+model Availability {
+  employeeId String   @map("employee_id") @db.VarChar(10)
+  date       DateTime @db.Date
+  startTime  DateTime @map("start_time") @db.Time(6)
+  endTime    DateTime @map("end_time") @db.Time(6)
+  status     String   @db.VarChar(30)
+
+  employee Employee @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
+
+  @@id([employeeId, date, startTime])
+  @@map("Availability")
 }
