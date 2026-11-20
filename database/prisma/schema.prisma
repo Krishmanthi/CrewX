@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  user_id        String   @id @default(dbgenerated("nextval('\"User_user_id_seq\"'::regclass)")) @db.VarChar(10)
+  username       String
+  email          String   @unique
+  password_hash  String
+  role           String   @default("USER")
+  account_status String
+  created_at     DateTime @db.Timestamp(6)
+
+  @@map("User")
+}
