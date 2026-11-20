@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,57 +7,7 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  user_id        String   @id @default(dbgenerated("nextval('\"User_user_id_seq\"'::regclass)")) @db.VarChar(10)
-  username       String
-  email          String   @unique
-  password_hash  String
-  role           String   @default("USER")
-  account_status String
-  created_at     DateTime @db.Timestamp(6)
-
-  @@map("User")
-  employee Employee?
-}
-
-model Department {
-  departmentId String @id @map("department_id") @db.VarChar(10)
-  name         String @unique @db.VarChar(100)
-
-  teams Team[]
-
-  @@map("Department")
-}
-
-model Team {
-  teamId       String @id @map("team_id") @db.VarChar(10)
-  name         String @db.VarChar(100)
-  departmentId String @map("department_id") @db.VarChar(10)
-
-  department Department @relation(fields: [departmentId], references: [departmentId])
-  employees  Employee[]
-
-  @@map("Team")
-}
-
-model Employee {
-  employeeId String   @id @map("employee_id") @db.VarChar(10)
-  firstName  String   @map("first_name") @db.VarChar(100)
-  lastName   String   @map("last_name") @db.VarChar(100)
-  email      String   @unique @db.VarChar(255)
-  phone      String?  @db.VarChar(20)
-  hireDate   DateTime @map("hire_date") @db.Date
-  status     String   @db.VarChar(30)
-  teamId     String?  @map("team_id") @db.VarChar(10)
-  userId     String?  @unique @map("user_id") @db.VarChar(10)
-
-  team         Team?          @relation(fields: [teamId], references: [teamId])
-  user         User?          @relation(fields: [userId], references: [user_id])
-  availability Availability[]
-
-  @@map("Employee")
-}
-
+// 1. Availability
 model Availability {
   employeeId String   @map("employee_id") @db.VarChar(10)
   date       DateTime @db.Date
@@ -68,4 +19,180 @@ model Availability {
 
   @@id([employeeId, date, startTime])
   @@map("Availability")
+}
+
+// 2. Department
+model Department {
+  departmentId String @id @map("department_id") @db.VarChar(10)
+  name         String @unique @db.VarChar(100)
+
+  teams Team[]
+
+  @@map("Department")
+}
+
+// 3. Employee
+model Employee {
+  employeeId String    @id @map("employee_id") @db.VarChar(10)
+  firstName  String    @map("first_name") @db.VarChar(100)
+  lastName   String    @map("last_name") @db.VarChar(100)
+  email      String    @db.VarChar(260)
+  phone      String?   @db.VarChar(30)
+  hireDate   DateTime  @map("hire_date") @db.Date
+  status     String    @db.VarChar(30)
+  teamId     String?   @map("team_id") @db.VarChar(10)
+  userId     String?   @unique @map("user_id") @db.VarChar(10)
+
+  team          Team?          @relation(fields: [teamId], references: [teamId])
+  user          User?          @relation(fields: [userId], references: [userId])
+  availabilities Availability[]
+
+  @@map("Employee")
+}
+
+// 4. LeaveRequest
+model LeaveRequest {
+  requestId   String    @id @map("request_id") @db.VarChar(10)
+  startDate   DateTime  @map("start_date") @db.Date
+  endDate     DateTime  @map("end_date") @db.Date
+  reason      String?   @db.Text
+  status      String?   @default("Pending") @db.VarChar(30)
+  createdTime DateTime? @default(now()) @map("created_time") @db.Timestamp(6)
+  userId      String    @map("user_id") @db.VarChar(10)
+
+  user          User           @relation(fields: [userId], references: [userId])
+  notifications Notification[]
+
+  @@map("LeaveRequest")
+}
+
+// 5. Notification
+model Notification {
+  notificationId String    @id @map("notification_id") @db.VarChar(10)
+  type           String    @db.VarChar(50)
+  message        String    @db.Text
+  status         String?   @default("Unread") @db.VarChar(30)
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  requestId      String?   @map("request_id") @db.VarChar(10)
+  assignmentId   String?   @map("assignment_id") @db.VarChar(10)
+
+  leaveRequest    LeaveRequest?    @relation(fields: [requestId], references: [requestId])
+  shiftAssignment ShiftAssignment? @relation(fields: [assignmentId], references: [assignmentId])
+
+  @@map("Notification")
+}
+
+// 6. Schedule
+model Schedule {
+  scheduleId   String    @id @map("schedule_id") @db.VarChar(10)
+  scheduleType String?   @map("schedule_type") @db.VarChar(50)
+  startDate    DateTime  @map("start_date") @db.Date
+  endDate      DateTime  @map("end_date") @db.Date
+  status       String?   @default("draft") @db.VarChar(30)
+  userId       String    @map("user_id") @db.VarChar(10)
+
+  user            User                     @relation(fields: [userId], references: [userId])
+  shifts          Shift[]
+  schedulingRules Schedule_Scheduling_Rule[]
+
+  @@map("Schedule")
+}
+
+// 7. Schedule_Scheduling_Rule
+model Schedule_Scheduling_Rule {
+  scheduleId String @map("schedule_id") @db.VarChar(10)
+  ruleId     String @map("rule_id") @db.VarChar(10)
+
+  schedule Schedule        @relation(fields: [scheduleId], references: [scheduleId])
+  rule     Scheduling_Rule @relation(fields: [ruleId], references: [ruleId])
+
+  @@id([scheduleId, ruleId])
+  @@map("Schedule_Scheduling_Rule")
+}
+
+// 8. Scheduling_Rule
+model Scheduling_Rule {
+  ruleId      String  @id @map("rule_id") @db.VarChar(10)
+  ruleName    String  @map("rule_name") @db.VarChar(100)
+  description String? @db.Text
+  priority    Int?
+  reportId    String  @map("report_id") @db.VarChar(10)
+
+  report    report                       @relation(fields: [reportId], references: [reportId])
+  schedules Schedule_Scheduling_Rule[]
+
+  @@map("Scheduling_Rule")
+}
+
+// 9. Shift
+model Shift {
+  shiftId     String    @id @map("shift_id") @db.VarChar(10)
+  startTime   DateTime  @map("start_time") @db.Timestamp(6)
+  endTime     DateTime  @map("end_time") @db.Timestamp(6)
+  description String?   @db.Text
+  status      String?   @default("Available") @db.VarChar(30)
+  scheduleId  String    @map("schedule_id") @db.VarChar(10)
+
+  schedule   Schedule         @relation(fields: [scheduleId], references: [scheduleId])
+  assignment ShiftAssignment?
+
+  @@map("Shift")
+}
+
+// 10. ShiftAssignment
+model ShiftAssignment {
+  assignmentId String    @id @map("assignment_id") @db.VarChar(10)
+  createdTime  DateTime? @default(now()) @map("created_time") @db.Timestamp(6)
+  status       String?   @default("Assigned") @db.VarChar(30)
+  userId       String    @map("user_id") @db.VarChar(10)
+  shiftId      String    @unique @map("shift_id") @db.VarChar(10)
+
+  user          User           @relation(fields: [userId], references: [userId])
+  shift         Shift          @relation(fields: [shiftId], references: [shiftId])
+  notifications Notification[]
+
+  @@map("ShiftAssignment")
+}
+
+// 11. Team
+model Team {
+  teamId       String @id @map("team_id") @db.VarChar(10)
+  name         String @db.VarChar(100)
+  departmentId String @map("department_id") @db.VarChar(10)
+
+  department Department @relation(fields: [departmentId], references: [departmentId])
+  employees  Employee[]
+
+  @@map("Team")
+}
+
+// 12. User
+model User {
+  userId       String @id @map("user_id") @db.VarChar(10)
+  username     String @db.Text
+  email        String @db.Text
+  passwordHash String @map("password_hash") @db.Text
+  role         String @default("USER") @db.Text
+
+  employee         Employee?
+  leaveRequests    LeaveRequest[]
+  schedules        Schedule[]
+  shiftAssignments ShiftAssignment[]
+  reports          report[]
+
+  @@map("User")
+}
+
+// 13. report
+model report {
+  reportId   String    @id @map("report_id") @db.VarChar(10)
+  reportType String    @map("report_type") @db.VarChar(100)
+  startTime  DateTime? @map("start_time") @db.Timestamp(6)
+  endTime    DateTime? @map("end_time") @db.Timestamp(6)
+  userId     String    @map("user_id") @db.VarChar(10)
+
+  user            User             @relation(fields: [userId], references: [userId])
+  schedulingRules Scheduling_Rule[]
+
+  @@map("report")
 }
