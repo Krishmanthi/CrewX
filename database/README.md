@@ -1,92 +1,77 @@
-# CrewX – Database Setup (PostgreSQL + Prisma)
+# CrewX – Central Database
 
-## 1. Overview
+This folder contains the centralized PostgreSQL database schema and Prisma configuration for the CrewX project.
 
-This directory contains the database implementation for the CrewX project. PostgreSQL is used as the relational database management system, while Prisma ORM is used to manage database access and integrate the database with the backend application.
-
-## 2. Technologies Used
-
+## 1. Requirements
+- Node.js and npm
 - PostgreSQL
-- Prisma ORM 7.10.1
-- Node.js
-- JavaScript
+- Git
+- Visual Studio Code
 
-## 3. Project Structure
+## 2. Clone the Project
+Clone the CrewX repository and open the project in VS Code.
 
-```text
-database/
-├── prisma/
-│   ├── migrations/
-│   └── schema.prisma
-├── .env.example
-├── .gitignore
-├── index.js
-├── package.json
-├── package-lock.json
-├── prisma.config.ts
-├── README.md
-└── user_table.csv
-```
-
-## 4. Database Configuration
-
-Create a `.env` file inside the database directory.
-
-Add your PostgreSQL connection URL:
-
-```env
-DATABASE_URL="postgresql://USERNAME:PASSWORD@localhost:5432/DATABASE_NAME?schema=public"
-```
-
-Replace the placeholders with your PostgreSQL credentials and database name.
-
-**Note:** Never commit the actual `.env` file to GitHub.
-
-## 5. Installation
-
-Navigate to the database directory:
+Navigate to the database folder:
 
 ```bash
 cd database
 ```
 
-Install dependencies:
+## 3. Install Dependencies
+
+Run:
 
 ```bash
 npm install
 ```
 
-## 6. Prisma Setup
+## 4. Configure Database Connection
 
-Generate Prisma Client:
+1. Find the `.env.example` file.
+2. Create a copy and rename it to `.env`.
+3. Update the `DATABASE_URL` with your PostgreSQL connection details.
+
+Example:
+
+```env
+DATABASE_URL="postgresql://username:password@localhost:5432/crewx"
+```
+
+Use the database credentials provided by your team.
+
+## 5. Generate Prisma Client
+
+Run:
 
 ```bash
 npx prisma generate
 ```
 
-Apply the existing migrations to your database:
+This generates the Prisma Client based on the shared database schema.
 
-```bash
-npx prisma migrate deploy
-```
+## 6. Database Structure
 
-## 7. Database Connection Testing
+The `prisma/schema.prisma` file contains the centralized database models and their relationships.
 
-Start the backend server:
+All team members should use this shared schema when developing database-related features.
 
-```bash
-npm start
-```
+## 7. Important Guidelines
 
-Test the database connection using the configured API endpoint.
+- Always pull the latest changes before starting development.
+- Do not create separate database schemas for individual features.
+- Update the central Prisma schema when adding or modifying database models.
+- Coordinate schema changes with the team to avoid conflicts.
+- Never commit or push the `.env` file.
+- Commit and push changes to the appropriate Git branch.
 
-## 8. Sample Data
+## 8. Useful Commands
 
-The `user_table.csv` file contains sample user records for database testing and development.
+| Command | Purpose |
+|---|---|
+| `npm install` | Install dependencies |
+| `npx prisma generate` | Generate Prisma Client |
+| `npx prisma validate` | Validate the Prisma schema |
+| `npx prisma studio` | Open the database management interface |
+| `git pull` | Get the latest project changes |
 
-## 9. Important Notes
-
-- PostgreSQL must be installed and running.
-- Each developer must configure their own `.env` file.
-- Prisma Client should be generated after installing dependencies.
-- Do not commit database passwords or other sensitive credentials.
+**Note:** The central database schema is maintained in `prisma/schema.prisma`. Please coordinate database changes with the team before committing them.
